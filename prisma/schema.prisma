@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  seed     = "ts-node prisma/seed.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  username       String         @unique // Added username for @mentions
+  name           String
+  password       String
+  profilePicture String?
+  bio            String?
+  isVerified     Boolean        @default(false)
+  isActive       Boolean        @default(true)
+  role           UserRole       @default(USER)
+  lastLoginAt    DateTime?
+  posts          Post[]
+  comments       Comment[]
+  likes          Like[]
+  notifications  Notification[]
+  followers      Follow[]       @relation("following")
+  following      Follow[]       @relation("follower")
+  mentionedIn    Mention[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([email])
+  @@index([username])
+}
+
+model Post {
+  id           String     @id @default(uuid())
+  content      String
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  comments     Comment[]
+  likes        Like[]
+  mentions     Mention[]
+  likeCount    Int        @default(0)
+  commentCount Int        @default(0)
+  status       PostStatus @default(ACTIVE)
+  visibility   Visibility @default(PUBLIC)
+  metadata     Json? // For storing additional post metadata
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([status, visibility])
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id])
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  parentId  String? // For nested comments
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  follower    User     @relation("follower", fields: [followerId], references: [id])
+  following   User     @relation("following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  actorId   String? // User who triggered the notification
+  postId    String? // Optional post reference
+  commentId String? // Optional comment reference
+  read      Boolean          @default(false)
+  content   String? // Custom notification message
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model Mention {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([userId])
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum PostStatus {
+  ACTIVE
+  DELETED
+  HIDDEN
+  REPORTED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  FOLLOWERS
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  MENTION
+  FOLLOW
+  SYSTEM
+}
