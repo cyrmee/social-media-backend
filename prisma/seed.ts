@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { PrismaClient, NotificationType } from '@prisma/client';
+import { PrismaClient, NotificationType, Role } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -15,7 +12,7 @@ async function main() {
       email: 'john@example.com',
       username: 'john_doe',
       name: 'John Doe',
-      password: await argon2.hash('password123', {
+      hash: await argon2.hash('password123', {
         type: argon2.argon2id,
         memoryCost: 2 ** 16, // 64MB
         timeCost: 3, // number of iterations
@@ -38,12 +35,13 @@ async function main() {
       email: 'jane@example.com',
       username: 'jane_doe',
       name: 'Jane Doe',
-      password: await argon2.hash('password123', {
+      hash: await argon2.hash('password123', {
         type: argon2.argon2id,
         memoryCost: 2 ** 16,
         timeCost: 3,
         parallelism: 1,
       }),
+      userRoles: [Role.ADMIN, Role.USER],
       bio: 'Hello, I am Jane!',
       isVerified: true,
       posts: {

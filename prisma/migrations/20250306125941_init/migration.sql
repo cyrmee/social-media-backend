@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('USER', 'MODERATOR', 'ADMIN');
+CREATE TYPE "Role" AS ENUM ('USER', 'MODERATOR', 'ADMIN');
 
 -- CreateEnum
 CREATE TYPE "PostStatus" AS ENUM ('ACTIVE', 'DELETED', 'HIDDEN', 'REPORTED');
@@ -16,13 +16,17 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "hash" TEXT NOT NULL,
     "profilePicture" TEXT,
     "bio" TEXT,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "role" "UserRole" NOT NULL DEFAULT 'USER',
+    "failedLoginAttempts" INTEGER NOT NULL DEFAULT 0,
+    "userRoles" "Role"[] DEFAULT ARRAY['USER']::"Role"[],
     "lastLoginAt" TIMESTAMP(3),
+    "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "twoFactorSecret" TEXT,
+    "twoFactorBackupCodes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -43,6 +47,17 @@ CREATE TABLE "Post" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Media" (
+    "id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "postId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Media_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -125,6 +140,9 @@ CREATE INDEX "Post_createdAt_idx" ON "Post"("createdAt");
 CREATE INDEX "Post_status_visibility_idx" ON "Post"("status", "visibility");
 
 -- CreateIndex
+CREATE INDEX "Media_postId_idx" ON "Media"("postId");
+
+-- CreateIndex
 CREATE INDEX "Comment_postId_idx" ON "Comment"("postId");
 
 -- CreateIndex
@@ -165,6 +183,9 @@ CREATE UNIQUE INDEX "Mention_postId_userId_key" ON "Mention"("postId", "userId")
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Media" ADD CONSTRAINT "Media_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
