@@ -108,6 +108,9 @@ importers:
       '@eslint/js':
         specifier: ^9.22.0
         version: 9.22.0
+      '@golevelup/ts-jest':
+        specifier: ^0.6.2
+        version: 0.6.2
       '@nestjs/cli':
         specifier: ^11.0.5
         version: 11.0.5(@swc/cli@0.6.0(@swc/core@1.11.8)(chokidar@4.0.3))(@swc/core@1.11.8)(@types/node@22.13.10)(esbuild@0.25.1)
@@ -676,6 +679,9 @@ packages:
   '@eslint/plugin-kit@0.2.7':
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@golevelup/ts-jest@0.6.2':
+    resolution: {integrity: sha512-ks82vcWbnRuwHSKlrZTGCPPWXZEKlsn1VA2OiYfJ+tVMcMsI4y9ExWkf7FnmYypYJIRWKS9b9N5QVVrCOmaVlg==}
 
   '@graphql-tools/merge@8.4.2':
     resolution: {integrity: sha512-XbrHAaj8yDuINph+sAfuq3QCZ/tKblrTLOpirK0+CAgNlZUCHs0Fa+xtMUURgwCVThLle1AF7svJCxFizygLsw==}
@@ -4859,6 +4865,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.12.0
       levn: 0.4.1
+
+  '@golevelup/ts-jest@0.6.2': {}
 
   '@graphql-tools/merge@8.4.2(graphql@16.10.0)':
     dependencies:
