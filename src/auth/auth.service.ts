@@ -231,8 +231,12 @@ export class AuthService {
 
     const session = JSON.parse(sessionData);
 
-    // If 2FA is required but not verified, don't return the user
-    if (session.requires2FA && !session.verified2FA) {
+    // Only check 2FA verification if the user has it enabled
+    if (
+      session.twoFactorEnabled &&
+      session.requires2FA &&
+      !session.verified2FA
+    ) {
       return null;
     }
 
@@ -256,12 +260,7 @@ export class AuthService {
       },
     });
 
-    // If user doesn't exist or doesn't have 2FA enabled, deny access
-    if (!user || !user.twoFactorEnabled) {
-      return null;
-    }
-
-    return user;
+    return user; // Return the user regardless of 2FA status
   }
 
   async refreshSession(sessionId: string) {

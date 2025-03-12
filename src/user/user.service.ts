@@ -49,6 +49,11 @@ export class UserService {
   }
 
   async getProfile(userId: string) {
+    // Add validation to prevent undefined ID
+    if (!userId) {
+      throw new Error('User ID is required for profile lookup');
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -64,8 +69,6 @@ export class UserService {
         updatedAt: true,
         twoFactorEnabled: true,
         userRoles: true,
-        // Exclude sensitive fields like hash, twoFactorSecret, etc.
-        // Include aggregate data
         _count: {
           select: {
             posts: true,

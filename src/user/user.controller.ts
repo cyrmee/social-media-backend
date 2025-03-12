@@ -28,8 +28,7 @@ export class UserController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Request() req) {
-    const user = req.user;
-    return this.userService.getProfile(user.id);
+    return this.userService.getProfile(req.user);
   }
 
   @UseGuards(SessionAuthGuard, RolesGuard)

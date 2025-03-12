@@ -47,15 +47,19 @@ export class SessionAuthGuard implements CanActivate {
       return true;
     }
 
-    // For all other routes, check user status first
-    const user = await this.authService.getUserFromSession(sessionData);
-    if (!user?.isActive) {
-      throw new UnauthorizedException('User account is inactive');
+    // Then check 2FA verification status
+    if (
+      sessionData.twoFactorEnabled &&
+      sessionData.requires2FA &&
+      !sessionData.verified2FA
+    ) {
+      throw new UnauthorizedException('2FA verification required');
     }
 
-    // Then check 2FA verification status
-    if (sessionData.twoFactorEnabled && !sessionData.verified2FA) {
-      throw new UnauthorizedException('2FA verification required');
+    // For all other routes, check user status first
+    const user = await this.authService.getUserFromSession(sessionId);
+    if (!user?.isActive) {
+      throw new UnauthorizedException('User account is inactive');
     }
 
     return true;

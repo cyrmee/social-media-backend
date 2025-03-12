@@ -10,13 +10,9 @@ import {
   HttpCode,
   UsePipes,
   ValidationPipe,
-  ForbiddenException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { SessionAuthGuard } from './guards/session-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import {
@@ -30,10 +26,14 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
-  ApiBearerAuth,
   ApiCookieAuth,
 } from '@nestjs/swagger';
-import { LogoutGuard } from './guards/logout.guard';
+import {
+  LocalAuthGuard,
+  SessionAuthGuard,
+  RolesGuard,
+  LogoutGuard,
+} from './guards';
 
 @ApiTags('auth')
 @ApiCookieAuth()

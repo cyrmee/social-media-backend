@@ -7,8 +7,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { SessionSerializer } from './session.serializer';
 import { RedisModule } from '../redis/redis.module';
 import { ConfigModule } from '@nestjs/config';
-import { RolesGuard } from './guards/roles.guard';
-import { SessionAuthGuard } from './guards/session-auth.guard';
+import { RolesGuard, SessionAuthGuard } from './guards';
 
 @Module({
   imports: [

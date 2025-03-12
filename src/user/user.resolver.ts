@@ -16,13 +16,14 @@ export class UserResolver {
   async profile(@Context() context): Promise<UserDto> {
     const user = context.req.user;
 
-    // If we get here, 2FA is either not required or has been verified
-    const profile = await this.userService.getProfile(user.id);
+
+    // Pass just the ID to the service method
+    const profile = await this.userService.getProfile(user);
     return {
       ...profile,
       profilePicture: profile.profilePicture || '',
       bio: profile.bio || '',
-      roles: profile.roles || [],
+      roles: profile.userRoles || [], // Note: Match the field name from your DB
       updatedAt: profile.updatedAt || profile.createdAt,
     };
   }
