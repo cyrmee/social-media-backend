@@ -95,7 +95,7 @@ import { createClient } from '@redis/client';
           cookie: {
             httpOnly: true,
             secure: configService.get('NODE_ENV') === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
             path: '/',
             domain: configService.get('COOKIE_DOMAIN'), // Restrict to your domain
