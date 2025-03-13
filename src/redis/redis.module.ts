@@ -94,11 +94,11 @@ import { createClient } from '@redis/client';
           rolling: true, // Refresh session with each request
           cookie: {
             httpOnly: true,
-            secure: configService.get('NODE_ENV') === 'production',
+            // secure: configService.get('NODE_ENV') === 'production',
+            secure: true,
             sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
             path: '/',
-            domain: configService.get('COOKIE_DOMAIN'), // Restrict to your domain
           },
         });
       },
