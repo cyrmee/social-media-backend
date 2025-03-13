@@ -88,13 +88,13 @@ import { createClient } from '@redis/client';
         return session({
           store,
           secret: configService.get('SESSION_SECRET')!,
-          name: 'sessionId', // Custom cookie name
+          name: 'sessionId',
           resave: false,
-          saveUninitialized: false,
-          rolling: true, // Refresh session with each request
+          saveUninitialized: true, // Try setting this to true
+          rolling: true,
+          proxy: true, // Add this to trust the proxy headers
           cookie: {
             httpOnly: true,
-            // secure: configService.get('NODE_ENV') === 'production',
             secure: true,
             sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
