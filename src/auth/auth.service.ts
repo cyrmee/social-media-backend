@@ -231,15 +231,6 @@ export class AuthService {
 
     const session = JSON.parse(sessionData);
 
-    // Only check 2FA verification if the user has it enabled
-    if (
-      session.twoFactorEnabled &&
-      session.requires2FA &&
-      !session.verified2FA
-    ) {
-      return null;
-    }
-
     // Get user data
     const user = await this.prisma.user.findUnique({
       where: { id: session.userId },
