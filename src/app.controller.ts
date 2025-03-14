@@ -6,18 +6,18 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-  
+
   @Get()
   @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns a welcome message',
     schema: {
       type: 'string',
-      example: 'Hello from Social Media API!'
-    }
+      example: 'Hello from Social Media API!',
+    },
   })
-  getHello(): string {
+  getHello(): object {
     return this.appService.getHello();
   }
 }
