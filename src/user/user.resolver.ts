@@ -14,11 +14,8 @@ export class UserResolver {
   @Query(() => UserDto)
   @UseGuards(SessionAuthGuard)
   async profile(@Context() context): Promise<UserDto> {
-    const user = context.req.user;
-
-
     // Pass just the ID to the service method
-    const profile = await this.userService.getProfile(user);
+    const profile = await this.userService.getProfile(context.req.user.id);
     return {
       ...profile,
       profilePicture: profile.profilePicture || '',
@@ -30,7 +27,7 @@ export class UserResolver {
 
   @Query(() => [UserDto])
   @UseGuards(SessionAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN )
   async users(): Promise<UserDto[]> {
     const users = await this.userService.getAllUsers();
     return users.map((user) => ({

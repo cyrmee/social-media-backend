@@ -90,14 +90,18 @@ import { createClient } from '@redis/client';
           secret: configService.get('SESSION_SECRET')!,
           name: 'sessionId',
           resave: false,
-          saveUninitialized: true, // Try setting this to true
+          saveUninitialized: true, // Changed to true for both environments
           rolling: true,
-          proxy: true, // Add this to trust the proxy headers
+          proxy: true, // Trust proxy headers in both environments
           cookie: {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+            // For local development, secure cookies won't work without HTTPS
+            secure:
+              configService.get('NODE_ENV') === 'production' ? true : false,
+            // Use 'none' for production (cross-origin support), 'lax' for development
+            sameSite:
+              configService.get('NODE_ENV') === 'production' ? 'none' : 'lax',
+            maxAge: 1000 * 60 * 60 * 24 * 3, // 3 days
             path: '/',
           },
         });

@@ -62,6 +62,9 @@ export class SessionAuthGuard implements CanActivate {
       throw new UnauthorizedException('User account is inactive');
     }
 
+    // Attach the user to the request so it's available for controllers and other guards
+    request.user = user;
+
     return true;
   }
 }
