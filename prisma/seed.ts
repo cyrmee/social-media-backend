@@ -20,6 +20,7 @@ async function main() {
       }),
       bio: 'Hello, I am John!',
       isVerified: true,
+      twoFactorEnabled: true,
       posts: {
         create: {
           content: 'Hello World! This is my first post.',
@@ -44,6 +45,7 @@ async function main() {
       userRoles: [Role.ADMIN, Role.USER],
       bio: 'Hello, I am Jane!',
       isVerified: true,
+      twoFactorEnabled: true,
       posts: {
         create: {
           content: 'Nice to meet everyone!',

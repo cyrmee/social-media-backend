@@ -48,7 +48,7 @@ model User {
   failedLoginAttempts  Int            @default(0)
   userRoles            Role[]         @default([USER]) // Many-to-many relation with Role
   lastLoginAt          DateTime?
-  twoFactorEnabled     Boolean        @default(false)
+  twoFactorEnabled     Boolean        @default(true)
   twoFactorSecret      String?
   twoFactorBackupCodes String?
   posts                Post[]
