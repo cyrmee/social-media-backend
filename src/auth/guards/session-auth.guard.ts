@@ -39,7 +39,8 @@ export class SessionAuthGuard implements CanActivate {
     // Always allow access to 2FA setup and verification routes
     if (
       request.path.startsWith('/auth/2fa/generate') ||
-      request.path === '/auth/2fa/verify'
+      request.path === '/auth/2fa/verify' ||
+      request.path === '/auth/2fa/enable'
     ) {
       request.user = user;
       return true;
