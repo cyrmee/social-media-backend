@@ -15,13 +15,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { Roles } from './decorators/roles.decorator';
 import { Role } from '@prisma/client';
-import {
-  RegisterDto,
-  LoginDto,
-  TwoFactorAuthCodeDto,
-  TwoFactorAuthSetupDto,
-  RegisterPowerUsersDto,
-} from './dto/auth.dto';
+
 import {
   ApiTags,
   ApiOperation,
@@ -35,6 +29,14 @@ import {
   RolesGuard,
   LogoutGuard,
 } from './guards';
+import {
+  RegisterDto,
+  AuthUserResponseDto,
+  RegisterPowerUsersDto,
+  LoginDto,
+  TwoFactorAuthSetupDto,
+  TwoFactorAuthCodeDto,
+} from './dto';
 
 @ApiTags('auth')
 @ApiCookieAuth()
@@ -46,7 +48,11 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ status: 201, description: 'User successfully registered' })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully registered',
+    type: AuthUserResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Email already in use' })
   async register(@Body() registerDto: RegisterDto) {
@@ -61,6 +67,7 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: 'Power user successfully registered',
+    type: AuthUserResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -77,7 +84,11 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'User successfully logged in' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully logged in',
+    type: AuthUserResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const user = req.user;
@@ -210,6 +221,24 @@ export class AuthController {
     }
 
     return this.authService.refreshSession(req.sessionID);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('me')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get current user information' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user information retrieved',
+    type: AuthUserResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getCurrentUser(@Request() req) {
+    const user = await this.authService.getUserFromSession(req.sessionID);
+    if (!user) {
+      throw new UnauthorizedException('No active session');
+    }
+    return user;
   }
 
   @UseGuards(SessionAuthGuard, RolesGuard)

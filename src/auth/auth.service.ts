@@ -10,7 +10,7 @@ import { User, Role } from '@prisma/client';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 import { ConfigService } from '@nestjs/config';
-import { RegisterDto, RegisterPowerUsersDto } from './dto/auth.dto';
+import { RegisterDto, RegisterPowerUsersDto, AuthUserResponseDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -100,7 +100,7 @@ export class AuthService {
     });
   }
 
-  async login(user: any, sessionId: string) {
+  async login(user: any, sessionId: string): Promise<AuthUserResponseDto> {
     // Update last login timestamp
     await this.prisma.user.update({
       where: { id: user.id },
@@ -126,12 +126,13 @@ export class AuthService {
       { EX: sessionExpiry },
     ); // Expire based on session expiry setting
 
-    const userResponse = {
+    // Return standardized user response
+    const userResponse: AuthUserResponseDto = {
       id: user.id,
       email: user.email,
       username: user.username,
       name: user.name,
-      role: user.userRoles,
+      roles: user.userRoles,
       requires2FA: true, // Always require 2FA
       twoFactorEnabled: user.twoFactorEnabled || false,
     };
@@ -270,7 +271,9 @@ export class AuthService {
     };
   }
 
-  async getUserFromSession(sessionId: string) {
+  async getUserFromSession(
+    sessionId: string,
+  ): Promise<AuthUserResponseDto | null> {
     const sessionData = await this.redisClient.get(`session:${sessionId}`);
     if (!sessionData) {
       return null;
@@ -287,18 +290,26 @@ export class AuthService {
         username: true,
         name: true,
         userRoles: true,
-        profilePicture: true,
-        bio: true,
-        isVerified: true,
-        isActive: true,
         twoFactorEnabled: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true,
       },
     });
 
-    return user; // Return the user regardless of 2FA status
+    if (!user) {
+      return null;
+    }
+
+    const userResponse: AuthUserResponseDto = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      name: user.name,
+      roles: user.userRoles,
+      twoFactorEnabled: user.twoFactorEnabled,
+      requires2FA: session.requires2FA,
+      verified2FA: session.verified2FA,
+    };
+
+    return userResponse;
   }
 
   async refreshSession(sessionId: string) {
