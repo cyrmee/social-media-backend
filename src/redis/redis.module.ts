@@ -66,9 +66,7 @@ import { createClient } from '@redis/client';
           console.log('Attempting to reconnect to Redis...');
         });
 
-        redisClient.on('ready', () => {
-          console.log('Redis client successfully connected');
-        });
+        redisClient.on('ready', () => {});
 
         try {
           await redisClient.connect();

@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:seed": "ts-node prisma/seed.ts",
     "db:reset": "npx prisma migrate reset --force && npm run prisma:seed && npx prisma generate",
-    "dev": "npm run start:dev"
+    "dev": "nest start --watch"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
