@@ -38,7 +38,7 @@ export class AuthService {
     return null;
   }
 
-  async register(userData: RegisterDto): Promise<User> {
+  async register(userData: RegisterDto): Promise<AuthUserResponseDto> {
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -53,7 +53,7 @@ export class AuthService {
     }
 
     const hash = await argon2.hash(userData.password);
-    return this.prisma.user.create({
+    const createdUser = await this.prisma.user.create({
       data: {
         email: userData.email,
         username: userData.username,
@@ -62,12 +62,27 @@ export class AuthService {
         userRoles: [Role.USER],
       },
     });
+
+    // Return standardized user response
+    const userResponse: AuthUserResponseDto = {
+      id: createdUser.id,
+      email: createdUser.email,
+      username: createdUser.username,
+      name: createdUser.name,
+      roles: [Role.USER],
+      twoFactorEnabled: createdUser.twoFactorEnabled,
+      requires2FA: true,
+    };
+
+    return userResponse;
   }
 
   /**
    * Register a power user (admin or moderator) - only accessible to admins
    */
-  async registerPowerUser(powerUserData: RegisterPowerUsersDto): Promise<User> {
+  async registerPowerUser(
+    powerUserData: RegisterPowerUsersDto,
+  ): Promise<AuthUserResponseDto> {
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -88,7 +103,7 @@ export class AuthService {
     const hash = await argon2.hash(powerUserData.password);
 
     // Create the power user with specified roles
-    return this.prisma.user.create({
+    const createdUser = await this.prisma.user.create({
       data: {
         email: powerUserData.email,
         username: powerUserData.username,
@@ -98,6 +113,18 @@ export class AuthService {
         isVerified: true,
       },
     });
+
+    const userResponse: AuthUserResponseDto = {
+      id: createdUser.id,
+      email: createdUser.email,
+      username: createdUser.username,
+      name: createdUser.name,
+      roles: createdUser.userRoles,
+      twoFactorEnabled: createdUser.twoFactorEnabled,
+      requires2FA: true,
+    };
+
+    return userResponse;
   }
 
   async login(user: any, sessionId: string): Promise<AuthUserResponseDto> {
