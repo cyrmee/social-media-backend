@@ -27,7 +27,10 @@ import { createClient } from '@redis/client';
           },
           password: configService.get('REDIS_PASSWORD'),
           tls: process.env.NODE_ENV === 'production' ? {} : undefined,
-          ttl: 60 * 60 * 24 * 7, // 7 days
+          ttl: configService.get<number>(
+            'SESSION_EXPIRY_SECONDS',
+            60 * 60 * 24 * 3,
+          ),
         }),
       }),
       isGlobal: true,
@@ -90,15 +93,13 @@ import { createClient } from '@redis/client';
           secret: configService.get('SESSION_SECRET')!,
           name: 'sessionId',
           resave: false,
-          saveUninitialized: true, // Changed to true for both environments
+          saveUninitialized: true,
           rolling: true,
-          proxy: true, // Trust proxy headers in both environments
+          proxy: true,
           cookie: {
             httpOnly: true,
-            // For local development, secure cookies won't work without HTTPS
             secure:
               configService.get('NODE_ENV') === 'production' ? true : false,
-            // Use 'none' for production (cross-origin support), 'lax' for development
             sameSite:
               configService.get('NODE_ENV') === 'production' ? 'none' : 'lax',
             maxAge: 1000 * 60 * 60 * 24 * 3, // 3 days

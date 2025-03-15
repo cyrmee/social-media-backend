@@ -70,6 +70,11 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
+    const sessionExpiry = this.configService.get<number>(
+      'SESSION_EXPIRY_SECONDS',
+      60 * 60 * 24 * 3,
+    );
+
     // Always set requires2FA to true, and verified2FA to false until verification
     await this.redisClient.set(
       `session:${sessionId}`,
@@ -81,8 +86,8 @@ export class AuthService {
         verified2FA: false,
         twoFactorEnabled: user.twoFactorEnabled || false,
       }),
-      { EX: 60 * 60 * 24 * 7 },
-    ); // Expire in 7 days
+      { EX: sessionExpiry },
+    ); // Expire based on session expiry setting
 
     const userResponse = {
       id: user.id,
@@ -208,6 +213,11 @@ export class AuthService {
       });
     }
 
+    const sessionExpiry = this.configService.get<number>(
+      'SESSION_EXPIRY_SECONDS',
+      60 * 60 * 24 * 3,
+    );
+
     // Update session to mark 2FA as verified
     await this.redisClient.set(
       `session:${sessionId}`,
@@ -215,8 +225,8 @@ export class AuthService {
         ...session,
         verified2FA: true,
       }),
-      { EX: 60 * 60 * 24 * 7 },
-    ); // Expire in 7 days
+      { EX: sessionExpiry },
+    ); // Expire based on config value
 
     return {
       message: 'Two-factor authentication verified successfully',
@@ -263,8 +273,13 @@ export class AuthService {
     const session = JSON.parse(sessionData);
 
     // Extend the session TTL
+    const sessionExpiry = this.configService.get<number>(
+      'SESSION_EXPIRY_SECONDS',
+      60 * 60 * 24 * 3,
+    );
+
     await this.redisClient.set(`session:${sessionId}`, sessionData, {
-      EX: 60 * 60 * 24 * 7, // Refresh for another 7 days
+      EX: sessionExpiry,
     });
 
     console.log(
