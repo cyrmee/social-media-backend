@@ -11,17 +11,17 @@ import { Role } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'User email address',
-    example: 'user@example.com' 
+    example: 'user@example.com',
   })
   @IsEmail({}, { message: 'Please provide a valid email' })
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Username (alphanumeric, min 3 characters)',
-    example: 'johndoe123' 
+    example: 'johndoe123',
   })
   @IsString()
   @IsNotEmpty()
@@ -29,17 +29,60 @@ export class RegisterDto {
   @MinLength(3)
   username: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Full name of the user',
-    example: 'John Doe' 
+    example: 'John Doe',
   })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ 
-    description: 'Password (min 8 chars with uppercase, lowercase, and number/special char)',
-    example: 'StrongP@ss123'
+  @ApiProperty({
+    description:
+      'Password (min 8 chars with uppercase, lowercase, and number/special char)',
+    example: 'StrongP@ss123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message:
+      'Password must contain uppercase, lowercase, number/special character',
+  })
+  password: string;
+}
+
+export class RegisterPowerUsersDto {
+  @ApiProperty({
+    description: 'User email address',
+    example: 'user@example.com',
+  })
+  @IsEmail({}, { message: 'Please provide a valid email' })
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({
+    description: 'Username (alphanumeric, min 3 characters)',
+    example: 'johndoe123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsAlphanumeric()
+  @MinLength(3)
+  username: string;
+
+  @ApiProperty({
+    description: 'Full name of the user',
+    example: 'John Doe',
+  })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({
+    description:
+      'Password (min 8 chars with uppercase, lowercase, and number/special char)',
+    example: 'StrongP@ss123',
   })
   @IsString()
   @IsNotEmpty()
@@ -50,27 +93,28 @@ export class RegisterDto {
   })
   password: string;
 
-  @ApiPropertyOptional({ 
-    description: 'User role',
+  @ApiProperty({
+    description: 'User roles',
     enum: Role,
-    example: Role.USER
+    isArray: true,
+    example: [Role.ADMIN, Role.MODERATOR],
   })
-  @IsOptional()
-  role?: Role;
+  @IsNotEmpty()
+  roles: Role[];
 }
 
 export class LoginDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'User email address',
-    example: 'user@example.com' 
+    example: 'user@example.com',
   })
   @IsEmail({}, { message: 'Please provide a valid email' })
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'User password',
-    example: 'StrongP@ss123' 
+    example: 'StrongP@ss123',
   })
   @IsString()
   @IsNotEmpty()
@@ -78,9 +122,9 @@ export class LoginDto {
 }
 
 export class TwoFactorAuthCodeDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Two-factor authentication code (6+ characters)',
-    example: '123456' 
+    example: '123456',
   })
   @IsString()
   @IsNotEmpty()
@@ -89,9 +133,9 @@ export class TwoFactorAuthCodeDto {
 }
 
 export class TwoFactorAuthSetupDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Two-factor authentication setup code (6+ characters)',
-    example: '123456'
+    example: '123456',
   })
   @IsString()
   @IsNotEmpty()

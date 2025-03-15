@@ -125,6 +125,63 @@ describe('AuthService', () => {
     });
   });
 
+  describe('registerPowerUser', () => {
+    it('should create a power user with specified roles successfully', async () => {
+      const powerUserData = {
+        email: 'admin@example.com',
+        username: 'adminuser',
+        password: 'AdminPass123!',
+        name: 'Admin User',
+        roles: [Role.ADMIN, Role.MODERATOR],
+      };
+
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
+      mockPrismaService.user.create.mockResolvedValue({
+        id: '1',
+        email: powerUserData.email,
+        username: powerUserData.username,
+        name: powerUserData.name,
+        hash: 'hashedpassword',
+        userRoles: powerUserData.roles,
+        isVerified: true,
+      });
+
+      const result = await service.registerPowerUser(powerUserData);
+
+      expect(result).toBeDefined();
+      expect(result.email).toBe(powerUserData.email);
+      expect(result.userRoles).toEqual(powerUserData.roles);
+      expect(result.isVerified).toBe(true);
+      expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+        data: {
+          email: powerUserData.email,
+          username: powerUserData.username,
+          name: powerUserData.name,
+          hash: expect.any(String),
+          userRoles: powerUserData.roles,
+          isVerified: true,
+        },
+      });
+    });
+
+    it('should throw error if power user with email or username already exists', async () => {
+      const powerUserData = {
+        email: 'existing@example.com',
+        username: 'existingadmin',
+        password: 'AdminPass123!',
+        name: 'Existing Admin',
+        roles: [Role.ADMIN],
+      };
+
+      mockPrismaService.user.findFirst.mockResolvedValue({ id: '1' });
+
+      await expect(service.registerPowerUser(powerUserData)).rejects.toThrow(
+        'User with this email or username already exists',
+      );
+      expect(mockPrismaService.user.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('2FA Operations', () => {
     it('should generate 2FA secret and QR code', async () => {
       const mockUser = {

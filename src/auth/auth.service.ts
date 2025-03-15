@@ -10,6 +10,7 @@ import { User, Role } from '@prisma/client';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 import { ConfigService } from '@nestjs/config';
+import { RegisterDto, RegisterPowerUsersDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,7 @@ export class AuthService {
     return null;
   }
 
-  async register(userData: any): Promise<User> {
+  async register(userData: RegisterDto): Promise<User> {
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
@@ -58,7 +59,43 @@ export class AuthService {
         username: userData.username,
         name: userData.name,
         hash,
-        userRoles: userData.role || Role.USER,
+        userRoles: [Role.USER],
+      },
+    });
+  }
+
+  /**
+   * Register a power user (admin or moderator) - only accessible to admins
+   */
+  async registerPowerUser(powerUserData: RegisterPowerUsersDto): Promise<User> {
+    // Check if user already exists
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: powerUserData.email },
+          { username: powerUserData.username },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      throw new ForbiddenException(
+        'User with this email or username already exists',
+      );
+    }
+
+    // Hash the password
+    const hash = await argon2.hash(powerUserData.password);
+
+    // Create the power user with specified roles
+    return this.prisma.user.create({
+      data: {
+        email: powerUserData.email,
+        username: powerUserData.username,
+        name: powerUserData.name,
+        hash,
+        userRoles: powerUserData.roles,
+        isVerified: true,
       },
     });
   }

@@ -15,8 +15,14 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return API information object', () => {
+      const result = appController.getHello();
+      expect(result).toBeInstanceOf(Object);
+      expect(result).toHaveProperty('name', 'Social Media API');
+      expect(result).toHaveProperty('version');
+      expect(result).toHaveProperty('status');
+      expect(result).toHaveProperty('documentation');
+      expect(result).toHaveProperty('features');
     });
   });
 });

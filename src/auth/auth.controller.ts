@@ -20,6 +20,7 @@ import {
   LoginDto,
   TwoFactorAuthCodeDto,
   TwoFactorAuthSetupDto,
+  RegisterPowerUsersDto,
 } from './dto/auth.dto';
 import {
   ApiTags,
@@ -50,6 +51,25 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Email already in use' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @UseGuards(SessionAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post('register/power-users')
+  @ApiOperation({ summary: 'Register power users (admin only)' })
+  @ApiBody({ type: RegisterPowerUsersDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Power user successfully registered',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - requires admin role' })
+  @ApiResponse({ status: 409, description: 'Email already in use' })
+  async registerPowerUser(
+    @Body() registerPowerUsersDto: RegisterPowerUsersDto,
+  ) {
+    return this.authService.registerPowerUser(registerPowerUsersDto);
   }
 
   @UseGuards(LocalAuthGuard)

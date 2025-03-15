@@ -60,7 +60,7 @@ describe('UserResolver', () => {
         name: 'Test User',
         profilePicture: 'avatar.jpg',
         bio: 'Test bio',
-        roles: [Role.USER],
+        userRoles: [Role.USER],
         isVerified: true,
         twoFactorEnabled: false,
         createdAt: new Date(),
@@ -78,7 +78,7 @@ describe('UserResolver', () => {
       const result = await resolver.profile(mockContext);
       expect(result).toBeDefined();
       expect(result.email).toBe(mockProfile.email);
-      expect(result.roles).toEqual(mockProfile.roles);
+      expect(result.roles).toEqual(mockProfile.userRoles); // Test that userRoles gets mapped to roles
       expect(result.profilePicture).toBe(mockProfile.profilePicture);
     });
   });

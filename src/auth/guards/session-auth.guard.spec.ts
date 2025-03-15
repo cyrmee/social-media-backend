@@ -177,15 +177,20 @@ describe('SessionAuthGuard', () => {
 
   describe('2FA Flow', () => {
     it('should handle unverified 2FA correctly', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        isActive: true,
+        twoFactorEnabled: true,
+      };
       const mockSessionData = {
         userId: '1',
         email: 'test@example.com',
-        twoFactorEnabled: true,
+        requires2FA: true,
         verified2FA: false,
       };
-
       mockAuthService.getSessionData.mockResolvedValue(mockSessionData);
-
+      mockAuthService.getUserFromSession.mockResolvedValue(mockUser);
       const mockContext = createMock<ExecutionContext>({
         getType: () => 'http',
         switchToHttp: () => ({
@@ -195,19 +200,24 @@ describe('SessionAuthGuard', () => {
           }),
         }),
       });
-
       expect(await guard.canActivate(mockContext)).toBe(true);
     });
 
     it('should deny access to protected routes when 2FA not verified', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        isActive: true,
+        twoFactorEnabled: true,
+      };
       const mockSessionData = {
         userId: '1',
         email: 'test@example.com',
-        twoFactorEnabled: true,
+        requires2FA: true,
         verified2FA: false,
       };
-
       mockAuthService.getSessionData.mockResolvedValue(mockSessionData);
+      mockAuthService.getUserFromSession.mockResolvedValue(mockUser);
 
       const mockContext = createMock<ExecutionContext>({
         getType: () => 'http',
